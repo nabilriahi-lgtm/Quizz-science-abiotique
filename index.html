@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Squishy Ecosystem Quest — MCPS Grade 6 Science</title>
+<meta name="description" content="Interactive Grade 6 ecosystem quiz: habitat, limiting factors, carrying capacity, populations, biodiversity and more.">
+<style>
+  :root{
+    --bg1:#e8fff4;
+    --bg2:#e8f3ff;
+    --ink:#183047;
+    --muted:#607487;
+    --card:#ffffffee;
+    --good:#118a5b;
+    --bad:#c54553;
+    --accent:#5b68ef;
+    --accent2:#8a55dd;
+    --shadow:0 18px 55px rgba(45,73,105,.16);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:Inter,ui-rounded,"SF Pro Rounded",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, #fff8c8 0 8%, transparent 9%),
+      radial-gradient(circle at 90% 18%, #dff8ff 0 11%, transparent 12%),
+      linear-gradient(145deg,var(--bg1),var(--bg2));
+    min-height:100vh; overflow-x:hidden;
+  }
+  .world{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .float{position:absolute;font-size:clamp(22px,4vw,42px);opacity:.58;animation:drift 10s ease-in-out infinite}
+  .f1{left:4%;top:12%}.f2{right:5%;top:24%;animation-delay:-2s}.f3{left:8%;bottom:12%;animation-delay:-5s}.f4{right:8%;bottom:10%;animation-delay:-7s}.f5{left:48%;top:3%;animation-delay:-3s}
+  @keyframes drift{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-18px) rotate(7deg)}}
+
+  .app{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:18px 16px 48px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .brand{display:flex;gap:10px;align-items:center;font-weight:900;letter-spacing:-.02em}
+  .brand-badge{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#fff;box-shadow:0 8px 24px #5e7aa322;font-size:24px}
+  .pill{background:#ffffffc9;border:1px solid #ffffff;box-shadow:0 8px 22px #425b7a16;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:800}
+  button,select,input{font:inherit}
+  button{cursor:pointer}
+  .card{background:var(--card);backdrop-filter:blur(10px);border:1px solid #fff;border-radius:30px;box-shadow:var(--shadow)}
+  .home{padding:clamp(22px,5vw,44px);text-align:center}
+  h1{font-size:clamp(34px,7vw,64px);line-height:.95;margin:4px auto 12px;max-width:800px;letter-spacing:-.055em}
+  .gradient{background:linear-gradient(90deg,#2b9a6e,#5368f5,#9f4ed4);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{font-size:clamp(16px,2.8vw,20px);line-height:1.5;color:var(--muted);max-width:720px;margin:0 auto 22px}
+  .mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 26px}
+  .mini{background:#f7faff;border:1px solid #e7eef9;border-radius:20px;padding:14px 10px;font-size:13px;font-weight:800;color:#4a6076}
+  .mini b{display:block;font-size:21px;color:var(--ink);margin-bottom:3px}
+  .setup{max-width:640px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+  .field{background:#f8fbff;border:1px solid #e5edf7;border-radius:18px;padding:12px}
+  .field label{display:block;font-weight:900;font-size:12px;color:#6c7e90;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em}
+  .field select,.field input{width:100%;border:0;background:transparent;outline:0;color:var(--ink);font-weight:800}
+  .start{grid-column:1/-1;border:0;border-radius:18px;padding:16px 18px;font-weight:950;color:white;background:linear-gradient(90deg,#4267ef,#8c4fdb);box-shadow:0 12px 28px #6255dc3d;transition:.18s transform}
+  .start:hover{transform:translateY(-2px)}
+  .note{font-size:12px;color:#728497;margin-top:16px}
+
+  .quiz{display:none}
+  .hud{display:grid;grid-template-columns:1.3fr auto auto auto;gap:10px;align-items:center;margin-bottom:12px}
+  .progress-wrap{background:#fff;border-radius:999px;height:16px;overflow:hidden;box-shadow:inset 0 0 0 1px #e6edf5}
+  .progress{height:100%;width:0%;background:linear-gradient(90deg,#45c88c,#5875f3,#a95ade);border-radius:999px;transition:width .35s ease}
+  .hudbox{background:#fff;border-radius:16px;padding:8px 12px;font-weight:900;font-size:13px;box-shadow:0 7px 20px #4f698616}
+  .quizcard{padding:clamp(18px,4vw,34px)}
+  .question-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .category{display:inline-flex;align-items:center;gap:6px;background:#eef3ff;color:#4c5bb7;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
+  .qcount{font-size:12px;font-weight:900;color:#75879a}
+  .squishy-stage{height:155px;display:grid;place-items:center;position:relative}
+  .squishy{
+    width:116px;height:94px;border-radius:45% 55% 48% 52% / 53% 46% 54% 47%;
+    background:linear-gradient(145deg,#a9f2c4,#55d59c);
+    position:relative;box-shadow:inset -10px -12px 0 #32b78322,0 18px 28px #2f9c6f24;
+    transform-origin:center bottom;animation:idle 2.2s ease-in-out infinite;
+  }
+  .squishy:before,.squishy:after{content:"";position:absolute;width:15px;height:20px;background:#19384a;border-radius:50%;top:34px}
+  .squishy:before{left:31px}.squishy:after{right:31px}
+  .mouth{position:absolute;left:50%;top:60px;width:28px;height:12px;transform:translateX(-50%);border-bottom:4px solid #19384a;border-radius:0 0 50% 50%;transition:.2s}
+  .cheek{position:absolute;top:53px;width:13px;height:7px;border-radius:50%;background:#ff8da355;filter:blur(.2px)}
+  .cheek.l{left:17px}.cheek.r{right:17px}
+  .shadow{position:absolute;width:100px;height:18px;border-radius:50%;background:#5166781b;bottom:15px;filter:blur(3px);animation:shadowPulse 2.2s ease-in-out infinite}
+  @keyframes idle{0%,100%{transform:translateY(2px) scale(1.02,.98) rotate(-1deg)}50%{transform:translateY(-8px) scale(.97,1.04) rotate(1deg)}}
+  @keyframes shadowPulse{0%,100%{transform:scale(1)}50%{transform:scale(.82)}}
+  .squishy.correct{animation:happy .72s cubic-bezier(.2,.8,.2,1)}
+  .squishy.correct .mouth{height:18px;border-bottom-width:5px}
+  .squishy.wrong{animation:wrong .52s ease}
+  .squishy.wrong .mouth{border-bottom:0;border-top:4px solid #19384a;border-radius:50% 50% 0 0;top:67px}
+  @keyframes happy{0%{transform:scale(1)}30%{transform:translateY(12px) scale(1.22,.72)}65%{transform:translateY(-34px) scale(.82,1.24) rotate(5deg)}100%{transform:scale(1)}}
+  @keyframes wrong{0%,100%{transform:translateX(0) scale(1)}20%{transform:translateX(-14px) rotate(-7deg) scale(.94,1.04)}40%{transform:translateX(14px) rotate(7deg)}60%{transform:translateX(-9px) rotate(-4deg)}80%{transform:translateX(7px) rotate(3deg)}}
+  .bubble{position:absolute;top:3px;left:calc(50% + 70px);background:white;border-radius:18px 18px 18px 5px;padding:8px 10px;font-size:12px;font-weight:900;box-shadow:0 7px 20px #3b50641b;max-width:170px;opacity:0;transform:translateY(6px);transition:.2s}
+  .bubble.show{opacity:1;transform:translateY(0)}
+  .question{font-size:clamp(20px,4vw,31px);font-weight:950;line-height:1.18;letter-spacing:-.03em;margin:0 0 18px;text-align:center}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .answer{
+    text-align:left;border:2px solid #e8eef6;background:#fbfdff;border-radius:20px;padding:15px 16px;font-weight:850;color:#294156;
+    min-height:64px;transition:.16s ease;display:flex;gap:10px;align-items:center;
+  }
+  .answer:hover{border-color:#bcc9ff;transform:translateY(-1px);background:#f7f8ff}
+  .letter{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:#edf1f7;color:#52677a;font-size:12px;font-weight:950}
+  .answer.good{border-color:#64d6a1;background:#edfff6;color:#146c4c}
+  .answer.bad{border-color:#ff9cab;background:#fff2f4;color:#a13243}
+  .answer.dim{opacity:.48}
+  .feedback{display:none;margin-top:16px;border-radius:22px;padding:17px;border:1px solid #e7edf5;background:#f8fbff}
+  .feedback.show{display:block;animation:rise .25s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .feedback h3{margin:0 0 8px;font-size:18px}
+  .feedback p{margin:5px 0;line-height:1.45}
+  .feedback .fr{color:#364f66}
+  .feedback .en{color:#5b6f83}
+  .next{display:none;width:100%;margin-top:14px;border:0;border-radius:18px;padding:15px 18px;color:white;background:linear-gradient(90deg,#2e9d74,#596de9);font-weight:950}
+  .next.show{display:block}
+  .confetti{position:fixed;z-index:20;pointer-events:none;width:10px;height:14px;border-radius:3px;animation:fall 900ms ease-out forwards}
+  @keyframes fall{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+  .result{display:none;padding:clamp(24px,5vw,44px);text-align:center}
+  .result h2{font-size:clamp(32px,6vw,58px);margin:8px 0;letter-spacing:-.04em}
+  .scorebig{font-size:clamp(54px,11vw,100px);font-weight:1000;letter-spacing:-.07em}
+  .review{margin:18px auto 0;max-width:720px;text-align:left;display:grid;gap:10px}
+  .review-item{background:#f8fbff;border:1px solid #e5edf5;border-radius:18px;padding:14px}
+  .review-item b{display:block;margin-bottom:6px}
+  .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .action{border:0;border-radius:16px;padding:13px 17px;font-weight:950;background:#fff;box-shadow:0 8px 20px #49647d19;color:#29445a}
+  .action.primary{background:linear-gradient(90deg,#4569ef,#8a55dc);color:#fff}
+  .tiny{font-size:12px;color:#708398}
+  .hidden{display:none!important}
+  @media(max-width:700px){
+    .mini-grid{grid-template-columns:1fr 1fr}
+    .setup{grid-template-columns:1fr}
+    .start{grid-column:auto}
+    .hud{grid-template-columns:1fr auto auto}
+    .hud .streakbox{display:none}
+    .answers{grid-template-columns:1fr}
+    .squishy-stage{height:142px}
+    .bubble{left:auto;right:2px}
+    .question{margin-top:0}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+<div class="world" aria-hidden="true">
+  <div class="float f1">🌿</div><div class="float f2">💧</div><div class="float f3">🍄</div><div class="float f4">🦊</div><div class="float f5">☀️</div>
+</div>
+
+<main class="app">
+  <div class="topbar">
+    <div class="brand"><div class="brand-badge">🧪</div><div>Squishy Ecosystem Quest</div></div>
+    <div class="pill" id="bankPill">Loading question bank…</div>
+  </div>
+
+  <section class="card home" id="home">
+    <div class="pill" style="display:inline-block;margin-bottom:15px">MCPS • Grade 6 Science</div>
+    <h1>Master ecosystems with your <span class="gradient">Squishy Study Buddy</span></h1>
+    <p class="lead">Habitat, biotic & abiotic factors, limiting factors, carrying capacity, population changes, competition, food webs, biodiversity and more.</p>
+
+    <div class="mini-grid">
+      <div class="mini"><b id="bankCount">270+</b>questions</div>
+      <div class="mini"><b>🇺🇸 + 🇫🇷</b>wrong-answer help</div>
+      <div class="mini"><b>🧠</b>MCPS-style reasoning</div>
+      <div class="mini"><b>✨</b>squishy reactions</div>
+    </div>
+
+    <div class="setup">
+      <div class="field">
+        <label for="studentName">Student name</label>
+        <input id="studentName" maxlength="18" placeholder="Type your name">
+      </div>
+      <div class="field">
+        <label for="length">Quiz length</label>
+        <select id="length">
+          <option value="20">20 questions</option>
+          <option value="30">30 questions</option>
+          <option value="50">50 questions</option>
+          <option value="100">100 questions</option>
+          <option value="all">All questions</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="categorySelect">Focus</label>
+        <select id="categorySelect">
+          <option value="all">Everything</option>
+          <option value="Foundations">Foundations</option>
+          <option value="Resources & Limits">Resources & Limits</option>
+          <option value="Population Dynamics">Population Dynamics</option>
+          <option value="Interactions">Interactions</option>
+          <option value="Food Webs">Food Webs</option>
+          <option value="Biodiversity & Change">Biodiversity & Change</option>
+          <option value="Data Reasoning">Data Reasoning</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="mixed">Mixed</option>
+          <option value="easy">Mostly definitions</option>
+          <option value="reasoning">Mostly reasoning</option>
+        </select>
+      </div>
+      <button class="start" id="startBtn">Start the ecosystem quest 🚀</button>
+    </div>
+    <p class="note">Tip: wrong answers are explained in both English and French. Progress is saved on this device.</p>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="hud">
+      <div class="progress-wrap" aria-label="Quiz progress"><div class="progress" id="progress"></div></div>
+      <div class="hudbox">⭐ <span id="score">0</span></div>
+      <div class="hudbox streakbox">🔥 <span id="streak">0</span></div>
+      <div class="hudbox">🏆 <span id="best">0</span></div>
+    </div>
+
+    <div class="card quizcard">
+      <div class="question-head">
+        <div class="category" id="category">🌱 Foundations</div>
+        <div class="qcount" id="qcount">1 / 20</div>
+      </div>
+
+      <div class="squishy-stage">
+        <div class="shadow"></div>
+        <div class="squishy" id="squishy">
+          <div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div>
+        </div>
+        <div class="bubble" id="bubble">You’ve got this!</div>
+      </div>
+
+      <div class="question" id="question">Question</div>
+      <div class="answers" id="answers"></div>
+
+      <div class="feedback" id="feedback">
+        <h3 id="feedbackTitle"></h3>
+        <p class="en" id="feedbackEn"></p>
+        <p class="fr" id="feedbackFr"></p>
+      </div>
+      <button class="next" id="nextBtn">Next question →</button>
+    </div>
+  </section>
+
+  <section class="card result" id="result">
+    <div style="font-size:54px">🌎🧠✨</div>
+    <h2 id="resultTitle">Quest complete!</h2>
+    <div class="scorebig" id="finalScore">0%</div>
+    <p class="lead" id="resultMessage"></p>
+    <div class="pill" style="display:inline-block">Best streak: 🔥 <span id="finalStreak">0</span></div>
+    <div class="review" id="review"></div>
+    <div class="actions">
+      <button class="action primary" id="againBtn">Play again</button>
+      <button class="action" id="wrongBtn">Practice missed concepts</button>
+    </div>
+    <p class="tiny">Your results stay only in this browser.</p>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = arr => {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+};
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+
+const settings = {
+  habitats:[
+    {place:"forest", animals:["deer","rabbits","foxes"], plant:"oak trees", resource:"acorns"},
+    {place:"pond", animals:["frogs","fish","dragonflies"], plant:"pondweed", resource:"aquatic insects"},
+    {place:"Chesapeake Bay marsh", animals:["blue crabs","herons","small fish"], plant:"marsh grass", resource:"small aquatic organisms"},
+    {place:"meadow", animals:["rabbits","hawks","grasshoppers"], plant:"grasses", resource:"seeds"},
+    {place:"schoolyard garden", animals:["bees","butterflies","sparrows"], plant:"flowering plants", resource:"nectar"},
+    {place:"stream", animals:["trout","mayflies","herons"], plant:"algae", resource:"aquatic insects"},
+    {place:"wetland", animals:["ducks","frogs","turtles"], plant:"cattails", resource:"small invertebrates"},
+    {place:"woodland", animals:["squirrels","owls","mice"], plant:"maple trees", resource:"seeds"},
+    {place:"grassland", animals:["mice","snakes","hawks"], plant:"grasses", resource:"seeds"}
+  ],
+  abiotic:["sunlight","temperature","rainfall","water","soil","oxygen level","salinity","air temperature"],
+  resources:["food","water","space","shelter","sunlight"],
+  impacts:["a drought","a flood","a severe winter","a heat wave","construction","pollution","a new road","a wildfire"],
+  names:["deer","rabbits","frogs","fish","sparrows","mice","foxes","hawks","owls","bees","blue crabs","turtles"],
+  decomposers:["fungi","bacteria"],
+  producers:["grass","algae","oak trees","marsh grass","wildflowers"],
+  consumers:["rabbit","deer","hawk","frog","blue crab"]
+};
+
+const Q = [];
+let qid=1;
+function add(category,difficulty,q,choices,answer,en,fr){
+  Q.push({id:qid++,category,difficulty,q,choices,answer,en,fr});
+}
+function defs(){
+  const D=[
+    ["Habitat","The place where an organism lives and gets what it needs to survive",
+      ["The place where an organism lives and gets what it needs to survive","All organisms of one species on Earth","A nonliving factor only","The largest population possible"],
+      "A habitat provides the conditions and resources an organism needs, such as food, water, shelter, and space.",
+      "Un habitat est l’endroit où vit un organisme et où il trouve les conditions et ressources nécessaires : nourriture, eau, abri et espace."],
+    ["Population","All organisms of the same species living in the same area at the same time",
+      ["All organisms of the same species living in the same area at the same time","All living and nonliving things in an area","Every species on Earth","Only the predators in an ecosystem"],
+      "A population is one species in one area at the same time.",
+      "Une population regroupe les organismes d’une même espèce vivant dans la même zone au même moment."],
+    ["Community","All the different populations living in the same area",
+      ["All the different populations living in the same area","One individual organism","Only nonliving factors","The maximum population size"],
+      "A community includes many populations of different species living together.",
+      "Une communauté comprend plusieurs populations d’espèces différentes vivant dans la même zone."],
+    ["Ecosystem","Living and nonliving parts of an area interacting with each other",
+      ["Living and nonliving parts of an area interacting with each other","One species living alone","Only the weather","Only the plants and animals, never nonliving things"],
+      "An ecosystem includes organisms plus nonliving factors and their interactions.",
+      "Un écosystème comprend les êtres vivants, les facteurs non vivants et leurs interactions."],
+    ["Biotic factor","A living or once-living part of an ecosystem",
+      ["A living or once-living part of an ecosystem","A factor that was never alive","Only sunlight","Only temperature"],
+      "Biotic factors come from living or once-living things, such as plants, animals, fungi, and dead leaves.",
+      "Un facteur biotique est vivant ou provient de quelque chose qui a vécu : plantes, animaux, champignons, feuilles mortes, etc."],
+    ["Abiotic factor","A nonliving part of an ecosystem",
+      ["A nonliving part of an ecosystem","A group of the same species","A predator hunting prey","A living resource"],
+      "Abiotic factors are nonliving conditions such as water, light, temperature, soil, or salinity.",
+      "Un facteur abiotique est un élément non vivant, comme l’eau, la lumière, la température, le sol ou la salinité."],
+    ["Limiting factor","A factor that restricts the size or growth of a population",
+      ["A factor that restricts the size or growth of a population","A factor that always increases a population","The name of an animal’s home","A type of producer"],
+      "A limiting factor keeps a population from growing without limit. It may be food, water, space, predators, disease, or weather.",
+      "Un facteur limitant empêche une population de croître sans limite. Il peut s’agir de nourriture, d’eau, d’espace, de prédateurs, de maladie ou de météo."],
+    ["Carrying capacity","The largest population an environment can support with available resources",
+      ["The largest population an environment can support with available resources","The amount an animal can physically carry","The number of species in the world","The speed at which animals migrate"],
+      "Carrying capacity depends on the resources and conditions available in the habitat.",
+      "La capacité de charge est la plus grande population qu’un milieu peut soutenir avec ses ressources et conditions disponibles."],
+    ["Competition","When organisms try to use the same limited resource",
+      ["When organisms try to use the same limited resource","When organisms always help each other","When water evaporates","When a predator becomes prey"],
+      "Competition occurs when more than one organism needs the same resource and there is not enough for everyone.",
+      "La compétition se produit lorsque plusieurs organismes ont besoin de la même ressource limitée."],
+    ["Biodiversity","The variety of living organisms in an area",
+      ["The variety of living organisms in an area","The amount of rainfall in one day","The number of only one species","The amount of soil in a habitat"],
+      "Biodiversity describes the variety of life in an ecosystem.",
+      "La biodiversité désigne la variété des êtres vivants présents dans un écosystème."],
+    ["Immigration","Movement of organisms into a population",
+      ["Movement of organisms into a population","Movement out of a population","Births in a population","Deaths in a population"],
+      "Immigration adds individuals to a population.",
+      "L’immigration correspond à l’arrivée d’individus dans une population, ce qui tend à l’augmenter."],
+    ["Emigration","Movement of organisms out of a population",
+      ["Movement of organisms out of a population","Movement into a population","An increase in births","A type of competition"],
+      "Emigration removes individuals from a population.",
+      "L’émigration correspond au départ d’individus d’une population, ce qui tend à la diminuer."],
+    ["Producer","An organism that makes its own food, usually using sunlight",
+      ["An organism that makes its own food, usually using sunlight","An organism that eats only predators","An organism that breaks down dead matter","A nonliving resource"],
+      "Plants and algae are producers because they make food using energy from sunlight.",
+      "Les plantes et les algues sont des producteurs car elles fabriquent leur nourriture grâce à l’énergie lumineuse."],
+    ["Consumer","An organism that gets energy by eating other organisms",
+      ["An organism that gets energy by eating other organisms","An organism that makes all its own food","A nonliving factor","A type of soil"],
+      "Consumers obtain energy by eating plants, animals, or both.",
+      "Les consommateurs obtiennent leur énergie en mangeant des plantes, des animaux, ou les deux."],
+    ["Decomposer","An organism that breaks down dead organisms and wastes",
+      ["An organism that breaks down dead organisms and wastes","An organism that always hunts","A source of sunlight","A type of habitat"],
+      "Decomposers such as fungi and bacteria recycle matter from dead material.",
+      "Les décomposeurs, comme les champignons et les bactéries, décomposent la matière morte et recyclent la matière."]
+  ];
+  for(let r=0;r<3;r++){
+    D.forEach(([term,ans,choices,en,fr])=>{
+      const forms=[
+        `Which definition best matches "${term}"?`,
+        `A student is asked to define "${term}." Which answer is best?`,
+        `Choose the most accurate Grade 6 science meaning of "${term}".`
+      ];
+      add("Foundations","easy",forms[r],shuffle(choices),ans,en,fr);
+    });
+  }
+}
+function bioticAbiotic(){
+  for(let r=0;r<3;r++){
+    settings.habitats.forEach(h=>{
+      const animal=pick(h.animals), abi=pick(settings.abiotic);
+      add("Foundations","easy",
+        `In a ${h.place}, which is a BIOTIC factor?`,
+        shuffle([animal,"water","temperature","sunlight"]),animal,
+        `${cap(animal)} is living, so it is a biotic factor.`,
+        `${cap(animal)} est vivant : c’est donc un facteur biotique.`);
+      const plant=h.plant;
+      add("Foundations","easy",
+        `In a ${h.place}, which is an ABIOTIC factor?`,
+        shuffle([abi,plant,animal,"fungi"]),abi,
+        `${cap(abi)} is nonliving, so it is an abiotic factor.`,
+        `${cap(abi)} est non vivant : c’est donc un facteur abiotique.`);
+    });
+  }
+}
+function resourcesLimits(){
+  settings.habitats.forEach((h,i)=>{
+    const animal=h.animals[0];
+    add("Resources & Limits","reasoning",
+      `A ${h.place} has less ${h.resource} than usual. ${cap(animal)} depend on it for food. What is most likely?`,
+      shuffle([`${cap(animal)} may face more competition and the population may decrease`,
+               `${cap(animal)} will definitely double`,
+               `The carrying capacity must increase`,
+               `The food shortage cannot affect the population`]),
+      `${cap(animal)} may face more competition and the population may decrease`,
+      `When food becomes limited, competition can increase and fewer individuals may survive or reproduce.`,
+      `Quand la nourriture devient limitée, la compétition peut augmenter et moins d’individus peuvent survivre ou se reproduire.`);
+    add("Resources & Limits","reasoning",
+      `A long drought reduces water and plant growth in a ${h.place}. Which statement is best?`,
+      shuffle([`Water and food can become limiting factors`,`The carrying capacity must increase`,`Drought is a biotic factor`,`Competition must disappear`]),
+      `Water and food can become limiting factors`,
+      `Drought can reduce water directly and reduce plant growth, so several resources may become limiting.`,
+      `Une sécheresse peut réduire directement l’eau et aussi la croissance des plantes ; plusieurs ressources peuvent donc devenir limitantes.`);
+    add("Resources & Limits","reasoning",
+      `If the amount of usable ${pick(settings.resources)} increases in a habitat and other conditions stay stable, what may happen to carrying capacity?`,
+      shuffle([`It may increase`,`It must become zero`,`It always decreases`,`It becomes the same as biodiversity`]),
+      `It may increase`,
+      `More usable resources can allow the habitat to support more individuals.`,
+      `Davantage de ressources utilisables peuvent permettre au milieu de soutenir plus d’individus.`);
+  });
+  for(let i=0;i<18;i++){
+    const res=pick(settings.resources), a=pick(settings.names);
+    add("Resources & Limits","reasoning",
+      `Many ${a} need the same limited ${res}. What ecological interaction becomes stronger?`,
+      shuffle(["Competition","Photosynthesis","Decomposition","Immigration"]),
+      "Competition",
+      `When organisms need the same limited resource, competition increases.`,
+      `Lorsque plusieurs organismes ont besoin de la même ressource limitée, la compétition augmente.`);
+  }
+}
+function capacityData(){
+  const sets=[
+    [80,45,78,102],[150,90,148,186],[60,25,58,77],[200,120,199,242],[40,18,39,55],
+    [125,74,123,164],[95,51,94,117],[175,108,173,205],[70,34,69,92]
+  ];
+  sets.forEach((s,idx)=>{
+    const [capv,low,near,over]=s;
+    const animal=settings.names[idx%settings.names.length];
+    add("Data Reasoning","reasoning",
+      `A habitat can support about ${capv} ${animal}. The population is ${near}. What does ${capv} represent?`,
+      shuffle(["Carrying capacity","Biodiversity","Immigration rate","Predator count"]),
+      "Carrying capacity",
+      `${capv} is the approximate maximum population this habitat can support with its current resources.`,
+      `${capv} représente environ la population maximale que cet habitat peut soutenir avec ses ressources actuelles.`);
+    add("Data Reasoning","reasoning",
+      `The carrying capacity for ${animal} is about ${capv}, but the population reaches ${over}. What is most likely next if resources do not increase?`,
+      shuffle(["Competition increases and the population may fall","Every individual will have more food","The carrying capacity automatically becomes "+over,"Limiting factors disappear"]),
+      "Competition increases and the population may fall",
+      `Above carrying capacity, resources are not sufficient for all individuals. Competition rises and the population may decline.`,
+      `Au-dessus de la capacité de charge, les ressources ne suffisent pas à tous. La compétition augmente et la population peut diminuer.`);
+    add("Data Reasoning","reasoning",
+      `A ${animal} population changes from ${low} to ${near} while food and shelter also increase. Which explanation is most reasonable?`,
+      shuffle(["More available resources may support a larger population","The habitat must have lost all resources","More food always causes extinction","Population size is unrelated to resources"]),
+      "More available resources may support a larger population",
+      `Population size often responds to resource availability. More resources can support more individuals.`,
+      `La taille d’une population dépend souvent des ressources disponibles. Plus de ressources peuvent soutenir davantage d’individus.`);
+  });
+}
+function populationRates(){
+  for(let i=0;i<18;i++){
+    const a=pick(settings.names);
+    const births=4+(i%7), deaths=1+(i%4), immigrants=2+(i%5), emigrants=1+(i%3);
+    const net=births+immigrants-deaths-emigrants;
+    const direction=net>0?"increase":net<0?"decrease":"stay the same";
+    add("Population Dynamics","reasoning",
+      `In one month, a population of ${a} has ${births} births, ${deaths} deaths, ${immigrants} immigrants, and ${emigrants} emigrants. Based only on these changes, should the population increase, decrease, or stay the same?`,
+      shuffle(["increase","decrease","stay the same","cannot ever be estimated"]),direction,
+      `Births + immigration = ${births+immigrants}. Deaths + emigration = ${deaths+emigrants}. The net change is ${net>0?"+":""}${net}, so the population should ${direction}.`,
+      `Naissances + immigration = ${births+immigrants}. Décès + émigration = ${deaths+emigrants}. Le changement net est ${net>0?"+":""}${net} : la population devrait donc ${direction==="increase"?"augmenter":direction==="decrease"?"diminuer":"rester stable"}.`);
+  }
+  for(let i=0;i<18;i++){
+    const a=pick(settings.names);
+    const scenario=i%4;
+    const data=[
+      [`more ${a} are born than die, while migration is balanced`,"increase",
+       "More births than deaths produce a positive population change when migration is balanced.",
+       "Si les naissances sont plus nombreuses que les décès et que la migration est équilibrée, la population augmente."],
+      [`many ${a} leave the habitat and very few enter`,"decrease",
+       "More emigration than immigration pushes population size downward.",
+       "Si davantage d’individus quittent l’habitat qu’il n’en arrive, la population diminue."],
+      [`many ${a} move into the habitat`,"increase",
+       "Immigration adds individuals to a population.",
+       "L’immigration ajoute des individus à la population."],
+      [`a disease causes the death rate to rise sharply`,"decrease",
+       "A higher death rate can reduce population size.",
+       "Une forte augmentation du taux de mortalité peut réduire la population."]
+    ][scenario];
+    add("Population Dynamics","reasoning",
+      `Suppose ${data[0]}. What is the most likely short-term effect on population size?`,
+      shuffle(["increase","decrease","stay exactly the same forever","become an abiotic factor"]),data[1],data[2],data[3]);
+  }
+}
+function interactions(){
+  for(let i=0;i<18;i++){
+    const prey=pick(["mice","rabbits","small fish","insects","frogs"]);
+    const pred=({mice:"owls",rabbits:"foxes","small fish":"herons",insects:"frogs",frogs:"herons"})[prey];
+    add("Interactions","reasoning",
+      `${cap(pred)} eat ${prey}. If the ${prey} population drops sharply, what could happen to the ${pred} population over time?`,
+      shuffle([`It may decrease because less food is available`,`It must double immediately`,`It becomes a producer`,`It cannot be affected by food supply`]),
+      `It may decrease because less food is available`,
+      `Predators depend on prey as a food resource. Fewer prey can become a limiting factor for predators.`,
+      `Les prédateurs dépendent de leurs proies comme ressource alimentaire. Une baisse des proies peut devenir un facteur limitant pour les prédateurs.`);
+    add("Interactions","reasoning",
+      `If the ${pred} population decreases greatly, what may happen first to the ${prey} population if other factors stay similar?`,
+      shuffle([`It may increase because predation pressure is lower`,`It must immediately go extinct`,`It becomes abiotic`,`It can never change`]),
+      `It may increase because predation pressure is lower`,
+      `With fewer predators, more prey may survive, although other limiting factors still matter.`,
+      `Avec moins de prédateurs, davantage de proies peuvent survivre, même si d’autres facteurs limitants continuent d’agir.`);
+  }
+}
+function foodWebs(){
+  const chains=[
+    ["grass","rabbit","hawk"],
+    ["algae","small fish","heron"],
+    ["seeds","mouse","owl"],
+    ["marsh grass","insect","frog"],
+    ["wildflowers","grasshopper","bird"],
+    ["pondweed","snail","duck"]
+  ];
+  for(let r=0;r<4;r++){
+    chains.forEach(c=>{
+      const [producer,first,second]=c;
+      add("Food Webs","easy",
+        `In the food chain ${producer} → ${first} → ${second}, which organism is the producer?`,
+        shuffle([producer,first,second,"fungi"]),producer,
+        `${cap(producer)} is a producer because it makes its own food using light energy.`,
+        `${cap(producer)} est un producteur car il fabrique sa propre nourriture grâce à l’énergie lumineuse.`);
+      add("Food Webs","reasoning",
+        `In the food chain ${producer} → ${first} → ${second}, the ${first} population drops. What may happen to the ${second} population?`,
+        shuffle([`It may decrease because it has less food`,`It must become a producer`,`It will always double`,`Nothing in a food web can affect another population`]),
+        `It may decrease because it has less food`,
+        `A decrease in a food source can limit the consumer that depends on it.`,
+        `Une diminution d’une source de nourriture peut limiter le consommateur qui en dépend.`);
+    });
+  }
+  for(let i=0;i<12;i++){
+    const d=pick(settings.decomposers);
+    add("Food Webs","easy",
+      `Which role best describes ${d} in an ecosystem?`,
+      shuffle(["Decomposer","Producer","Abiotic factor","Carrying capacity"]), "Decomposer",
+      `${cap(d)} break down dead material and help recycle matter.`,
+      `${cap(d)} décomposent la matière morte et participent au recyclage de la matière.`);
+  }
+}
+function biodiversityChange(){
+  const events=[
+    ["pollution enters a stream","some sensitive species disappear","decrease"],
+    ["a wetland is restored with native plants","more habitats and food sources become available","increase"],
+    ["a forest is cleared for construction","many organisms lose habitat","decrease"],
+    ["native plants are added to a schoolyard habitat","more organisms can find food and shelter","increase"],
+    ["an invasive species uses a large share of food and space","native species face stronger competition","decrease"],
+    ["water quality improves in a stream","more aquatic organisms can survive","increase"]
+  ];
+  for(let r=0;r<4;r++){
+    events.forEach(([event,why,dir])=>{
+      add("Biodiversity & Change","reasoning",
+        `Suppose ${event}. What is a reasonable prediction for local biodiversity?`,
+        shuffle(dir==="increase"?["It may increase","It must fall to zero","It cannot change","It becomes a limiting factor"]:["It may decrease","It must always increase","It becomes an abiotic factor","It cannot change"]),
+        dir==="increase"?"It may increase":"It may decrease",
+        `Biodiversity may ${dir} because ${why}.`,
+        `La biodiversité peut ${dir==="increase"?"augmenter":"diminuer"} car ${why==="some sensitive species disappear"?"certaines espèces sensibles disparaissent":why==="more habitats and food sources become available"?"davantage d’habitats et de nourriture deviennent disponibles":why==="many organisms lose habitat"?"de nombreux organismes perdent leur habitat":why==="more organisms can find food and shelter"?"davantage d’organismes trouvent nourriture et abri":why==="native species face stronger competition"?"les espèces locales subissent une compétition plus forte":"davantage d’organismes aquatiques peuvent survivre"}.`);
+    });
+  }
+}
+function scenarioMix(){
+  const scenarios=[
+    ["A lake becomes warmer and its dissolved oxygen drops","oxygen level","abiotic"],
+    ["A disease spreads through a rabbit population","disease","biotic"],
+    ["A new predator enters a meadow","predation","biotic"],
+    ["Rainfall is far below normal for several months","rainfall","abiotic"],
+    ["Too many animals need the same nesting space","space","resource"],
+    ["An insect population loses most of its flowering plants","food","resource"]
+  ];
+  for(let r=0;r<4;r++){
+    scenarios.forEach(([s,f,t])=>{
+      add("Resources & Limits","reasoning",
+        `${s}. Which factor is most directly limiting the population in this example?`,
+        shuffle([f,"biodiversity","community","immigration"]),f,
+        `${cap(f)} is the factor directly reducing the population's ability to survive or grow in this situation.`,
+        `${cap(f)} est ici le facteur qui réduit directement la capacité de la population à survivre ou à croître.`);
+    });
+  }
+}
+function misconceptions(){
+  const items=[
+    ["If a population is below carrying capacity, it will always increase forever.","False",
+      "Being below carrying capacity does not guarantee unlimited growth. Predators, disease, weather, and changing resources can still affect the population.",
+      "Être sous la capacité de charge ne garantit pas une croissance illimitée. Prédateurs, maladies, météo et ressources peuvent toujours modifier la population."],
+    ["A limiting factor can be biotic or abiotic.","True",
+      "Limiting factors include biotic factors such as predators and disease, and abiotic factors such as drought or temperature.",
+      "Un facteur limitant peut être biotique, comme les prédateurs ou les maladies, ou abiotique, comme la sécheresse ou la température."],
+    ["More food always means a population will grow without limit.","False",
+      "Food is only one factor. Space, water, predators, disease, and other limits still matter.",
+      "La nourriture n’est qu’un facteur. L’espace, l’eau, les prédateurs, les maladies et d’autres limites comptent aussi."],
+    ["Carrying capacity can change if resources or environmental conditions change.","True",
+      "Carrying capacity is not necessarily fixed; it can rise or fall as the habitat changes.",
+      "La capacité de charge n’est pas forcément fixe : elle peut augmenter ou diminuer quand l’habitat change."],
+    ["Immigration can increase population size.","True",
+      "Immigration means individuals move into a population.",
+      "L’immigration signifie que des individus arrivent dans une population."],
+    ["Emigration means organisms move into a population.","False",
+      "Emigration means leaving a population. Immigration means entering it.",
+      "L’émigration signifie quitter une population. L’immigration signifie y entrer."],
+    ["Sunlight is a biotic factor because plants use it.","False",
+      "Sunlight affects living things, but sunlight itself is nonliving, so it is abiotic.",
+      "La lumière du soleil influence les êtres vivants, mais elle n’est pas vivante : c’est donc un facteur abiotique."],
+    ["Competition can happen between organisms of the same species.","True",
+      "Members of the same species may compete for food, mates, water, shelter, or space.",
+      "Des individus de la même espèce peuvent entrer en compétition pour la nourriture, l’eau, l’espace, les partenaires ou l’abri."]
+  ];
+  for(let r=0;r<4;r++){
+    items.forEach(([statement,ans,en,fr])=>{
+      add("Data Reasoning",r<2?"easy":"reasoning",
+        `True or False: ${statement}`,
+        shuffle(["True","False"]),ans,en,fr);
+    });
+  }
+}
+
+defs();
+bioticAbiotic();
+resourcesLimits();
+capacityData();
+populationRates();
+interactions();
+foodWebs();
+biodiversityChange();
+scenarioMix();
+misconceptions();
+
+const uniqueQuestionCount = Q.length;
+$("#bankCount").textContent = uniqueQuestionCount + "+";
+$("#bankPill").textContent = uniqueQuestionCount + " questions in the bank";
+
+let session=[], idx=0, score=0, streak=0, bestStreak=0, answered=false, missed=[];
+let selectedCategory="all", selectedDifficulty="mixed";
+const bestKey="squishyEcoBest";
+$("#best").textContent=localStorage.getItem(bestKey)||0;
+$("#studentName").value=localStorage.getItem("squishyEcoName")||"";
+
+function chooseSession(forceMissed=false){
+  let pool = forceMissed && missed.length ? [...missed] : [...Q];
+  if(!forceMissed){
+    selectedCategory=$("#categorySelect").value;
+    selectedDifficulty=$("#difficulty").value;
+    if(selectedCategory!=="all") pool=pool.filter(q=>q.category===selectedCategory);
+    if(selectedDifficulty==="easy") pool=pool.filter(q=>q.difficulty==="easy");
+    if(selectedDifficulty==="reasoning") pool=pool.filter(q=>q.difficulty==="reasoning");
+  }
+  pool=shuffle(pool);
+  const val=$("#length").value;
+  const n=val==="all"?pool.length:Math.min(parseInt(val,10),pool.length);
+  return pool.slice(0,n);
+}
+
+function start(forceMissed=false){
+  const name=$("#studentName").value.trim();
+  if(name) localStorage.setItem("squishyEcoName",name);
+  session=chooseSession(forceMissed);
+  idx=0;score=0;streak=0;bestStreak=0;answered=false;
+  if(!forceMissed) missed=[];
+  $("#home").style.display="none";
+  $("#result").style.display="none";
+  $("#quiz").style.display="block";
+  $("#score").textContent=0;$("#streak").textContent=0;
+  render();
+}
+
+function render(){
+  answered=false;
+  const q=session[idx];
+  $("#category").textContent=catEmoji(q.category)+" "+q.category;
+  $("#qcount").textContent=(idx+1)+" / "+session.length;
+  $("#progress").style.width=(idx/session.length*100)+"%";
+  $("#question").textContent=q.q;
+  $("#feedback").classList.remove("show");
+  $("#nextBtn").classList.remove("show");
+  const s=$("#squishy"); s.classList.remove("correct","wrong");
+  $("#bubble").classList.remove("show");
+  s.style.background=squishyColor(q.category);
+  const ans=$("#answers");ans.innerHTML="";
+  const letters=["A","B","C","D"];
+  q.choices.forEach((choice,i)=>{
+    const b=document.createElement("button");
+    b.className="answer";
+    b.innerHTML=`<span class="letter">${letters[i]}</span><span>${choice}</span>`;
+    b.addEventListener("click",()=>answer(choice,b,q));
+    ans.appendChild(b);
+  });
+}
+
+function answer(choice,button,q){
+  if(answered)return;
+  answered=true;
+  const ok=choice===q.answer;
+  const buttons=[...document.querySelectorAll(".answer")];
+  buttons.forEach(b=>{
+    const text=b.querySelector("span:last-child").textContent;
+    if(text===q.answer)b.classList.add("good");
+    else if(b===button)b.classList.add("bad");
+    else b.classList.add("dim");
+    b.disabled=true;
+  });
+  if(ok){
+    score++;streak++;bestStreak=Math.max(bestStreak,streak);
+    $("#score").textContent=score;$("#streak").textContent=streak;
+    react(true);
+    $("#bubble").textContent=pick(["SQUISH-TASTIC! 🌟","You got it! 🌿","Science power! 🧠","Amazing! ✨","Correct! Keep going!"]);
+    $("#bubble").classList.add("show");
+    if(streak>0 && streak%5===0) confetti(32);
+  }else{
+    streak=0;$("#streak").textContent=0;
+    missed.push(q);
+    react(false);
+    $("#bubble").textContent=pick(["Oops — learn it, then crush it! 💪","Almost! Your brain is growing 🌱","Mistakes = learning fuel 🧠"]);
+    $("#bubble").classList.add("show");
+    $("#feedbackTitle").textContent="Not quite — here’s why:";
+    $("#feedbackEn").innerHTML="<strong>🇺🇸 English:</strong> "+q.en;
+    $("#feedbackFr").innerHTML="<strong>🇫🇷 Français :</strong> "+q.fr;
+    $("#feedback").classList.add("show");
+  }
+  $("#nextBtn").classList.add("show");
+}
+
+function react(good){
+  const s=$("#squishy");
+  s.classList.remove("correct","wrong");
+  void s.offsetWidth;
+  s.classList.add(good?"correct":"wrong");
+  if(good) confetti(18);
+}
+
+function next(){
+  idx++;
+  if(idx>=session.length)finish(); else render();
+}
+function finish(){
+  $("#quiz").style.display="none";
+  $("#result").style.display="block";
+  $("#progress").style.width="100%";
+  const pct=Math.round(score/session.length*100);
+  $("#finalScore").textContent=pct+"%";
+  $("#finalStreak").textContent=bestStreak;
+  const name=$("#studentName").value.trim();
+  $("#resultTitle").textContent=(name?name+", ":"")+"quest complete!";
+  let msg=pct>=90?"Excellent mastery — your ecosystem brain is thriving! 🌳":
+          pct>=75?"Strong work — review the missed concepts and go again! 🌱":
+          pct>=60?"Good progress — one more round will make these ideas stick. 🧠":
+          "Great practice start — use the missed-concepts round to build confidence. 💪";
+  $("#resultMessage").textContent=`${score} correct out of ${session.length}. ${msg}`;
+  const prev=parseInt(localStorage.getItem(bestKey)||"0",10);
+  if(pct>prev){localStorage.setItem(bestKey,pct);$("#best").textContent=pct}
+  const review=$("#review");review.innerHTML="";
+  if(missed.length){
+    const title=document.createElement("div");title.className="review-item";
+    title.innerHTML=`<b>🔁 ${missed.length} concept${missed.length>1?"s":""} to revisit</b><span class="tiny">The button below creates a practice round from your missed questions.</span>`;
+    review.appendChild(title);
+    [...new Map(missed.map(m=>[m.category,m])).values()].slice(0,6).forEach(m=>{
+      const d=document.createElement("div");d.className="review-item";
+      d.innerHTML=`<b>${catEmoji(m.category)} ${m.category}</b><span class="tiny">${m.en}</span>`;
+      review.appendChild(d);
+    });
+    $("#wrongBtn").classList.remove("hidden");
+  }else{
+    review.innerHTML='<div class="review-item"><b>🏆 Perfect round!</b><span class="tiny">No missed concepts this time.</span></div>';
+    $("#wrongBtn").classList.add("hidden");
+    confetti(65);
+  }
+}
+function catEmoji(c){
+  return {"Foundations":"🌱","Resources & Limits":"💧","Population Dynamics":"📈","Interactions":"🦊","Food Webs":"🕸️","Biodiversity & Change":"🌎","Data Reasoning":"🧠"}[c]||"🧪";
+}
+function squishyColor(c){
+  return {
+    "Foundations":"linear-gradient(145deg,#a9f2c4,#55d59c)",
+    "Resources & Limits":"linear-gradient(145deg,#9de8ff,#56b6ee)",
+    "Population Dynamics":"linear-gradient(145deg,#ffd59e,#ffad5d)",
+    "Interactions":"linear-gradient(145deg,#ffc1cf,#f0789b)",
+    "Food Webs":"linear-gradient(145deg,#d7c3ff,#9f78e8)",
+    "Biodiversity & Change":"linear-gradient(145deg,#c7ef91,#7ecb58)",
+    "Data Reasoning":"linear-gradient(145deg,#fff0a7,#f4c955)"
+  }[c];
+}
+function confetti(n){
+  const colors=["#45c88c","#5573ef","#f1c94f","#e76591","#9d5adf"];
+  for(let i=0;i<n;i++){
+    const el=document.createElement("i");el.className="confetti";
+    el.style.left=(window.innerWidth*.5+(Math.random()-.5)*130)+"px";
+    el.style.top=(window.innerHeight*.28+(Math.random()-.5)*80)+"px";
+    el.style.background=pick(colors);
+    el.style.setProperty("--dx",((Math.random()-.5)*360)+"px");
+    el.style.setProperty("--dy",(180+Math.random()*330)+"px");
+    el.style.setProperty("--rot",(Math.random()*900-450)+"deg");
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),950);
+  }
+}
+
+$("#startBtn").addEventListener("click",()=>start(false));
+$("#nextBtn").addEventListener("click",next);
+$("#againBtn").addEventListener("click",()=>{missed=[];$("#result").style.display="none";$("#home").style.display="block";});
+$("#wrongBtn").addEventListener("click",()=>start(true));
+document.addEventListener("keydown",e=>{
+  if($("#quiz").style.display==="block"){
+    if(!answered && ["1","2","3","4"].includes(e.key)){
+      const b=document.querySelectorAll(".answer")[parseInt(e.key)-1]; if(b)b.click();
+    }else if(answered && (e.key==="Enter"||e.key===" ")){e.preventDefault();next();}
+  }
+});
+</script>
+</body>
+</html>
